@@ -45,3 +45,14 @@ ANSIBLE_HOST_KEY_CHECKING=False ansible all -i inventory.ini -m ping
 
 - /terraform : Configuration de l'infrastructure.
 - /ansible : Inventaire des serveurs
+
+## 🔐 Gestion des Secrets (Ansible Vault)
+Les variables sensibles (mots de passe DB) sont stockées dans `ansible/vars/secrets.yml` et sont chiffrées avec **Ansible Vault**.
+
+Pour modifier les secrets :
+`ansible-vault edit ansible/vars/secrets.yml`
+
+## 🐘 Base de données
+Le déploiement de PostgreSQL se fait via Docker.
+Commande pour lancer le déploiement :
+`ansible-playbook -i inventory.ini deploy-db.yml --ask-vault-pass`

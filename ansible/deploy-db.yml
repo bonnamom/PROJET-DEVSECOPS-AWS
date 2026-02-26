@@ -1,0 +1,28 @@
+---
+- name: Installer et lancer PostgreSQL
+  hosts: all
+  become: yes
+
+  # On lie le coffre-fort au playbook
+  vars_files:
+    - vars/secrets.yml
+
+  tasks:
+    - name: Installer l'outil de liaison Ansible-Docker
+      apt:
+        name: python3-docker
+        state: present
+
+    - name: Créer et lancer le conteneur de la base de données
+      docker_container:
+        name: db_postgres
+        image: postgres:15
+        state: started
+        restart_policy: always
+        # On pioche les secrets dans le coffre-fort avec les {{ }}
+        env:
+          POSTGRES_USER: "{{ db_user }}"
+          POSTGRES_PASSWORD: "{{ db_password }}"
+          POSTGRES_DB: "app_db"
+        published_ports:
+          - "5432:5432"
