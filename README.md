@@ -15,7 +15,10 @@ L'infrastructure est déployée dans la région **Paris (eu-west-3)** et compren
 - **Infrastructure as Code :** Terraform
 - **Configuration & Déploiement :** Ansible
 - **Versionning :** Git & GitHub
-- **Cloud :** AWS (EC2, VPC, Security Groups)
+- **Cloud :** AWS (EC2, VPC, Security Groups)-
+- **Conteneurisation :** Docker & Docker Compose
+- **Base de données :** PostgreSQL
+
 
 ## 🚦 Guide de démarrage rapide
 
