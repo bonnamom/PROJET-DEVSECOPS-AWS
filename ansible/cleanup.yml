@@ -1,0 +1,15 @@
+---
+- name: Nettoyer le serveur de Test par défault, sinon cible=all pour tout
+  hosts: "{{ cible | default('test') }}"
+  become: yes
+
+  tasks:
+    - name: Supprimer le conteneur postgres s'il existe
+      docker_container:
+        name: db_postgres
+        state: absent
+
+    #- name: Supprimer le dossier de données( /!\ Attention ça supprime toute les données)
+    #  file:
+    #    path: /opt/postgres_data
+    #    state: absent

@@ -18,6 +18,7 @@ L'infrastructure est déployée dans la région **Paris (eu-west-3)** et compren
 - **Cloud :** AWS (EC2, VPC, Security Groups)-
 - **Conteneurisation :** Docker & Docker Compose
 - **Base de données :** PostgreSQL
+- **Sécurité :** Ansible Vault, UFW (Uncomplicated Firewall)
 
 
 ## 🚦 Guide de démarrage rapide
@@ -53,9 +54,22 @@ ANSIBLE_HOST_KEY_CHECKING=False ansible all -i inventory.ini -m ping
 Les variables sensibles (mots de passe DB) sont stockées dans `ansible/vars/secrets.yml` et sont chiffrées avec **Ansible Vault**.
 
 Pour modifier les secrets :
-`ansible-vault edit ansible/vars/secrets.yml`
+````ansible-vault edit ansible/vars/secrets.yml````
 
 ## 🐘 Base de données
 Le déploiement de PostgreSQL se fait via Docker.
+
+Commande pour installer docker :
+````ansible-playbook -i inventory.ini setup-docker.yml````
+
 Commande pour lancer le déploiement :
-`ansible-playbook -i inventory.ini deploy-db.yml --ask-vault-pass`
+````ansible-playbook -i inventory.ini deploy-db.yml --ask-vault-pass````
+
+## Activation du Pare-feu (UFW) :
+Sécurisation de l'OS tout en maintenant l'accès SSH, HTTP et BDD.
+````ansible -i inventory.ini all -m shell -a "sudo ufw allow 22/tcp && sudo ufw allow 80/tcp && sudo ufw allow 5432/tcp && sudo ufw --force enable"````
+
+## 🧪 Tests de connectivité
+Pour valider que le serveur de Test communique bien avec le serveur de Dev via le réseau privé AWS (port 5432) :
+
+````ansible-playbook -i inventory.ini test-connection.yml````

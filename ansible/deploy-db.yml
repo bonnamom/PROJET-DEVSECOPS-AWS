@@ -1,28 +1,46 @@
 ---
 - name: Installer et lancer PostgreSQL
-  hosts: all
+  hosts: shared_db, prod_db
   become: yes
 
   # On lie le coffre-fort au playbook
   vars_files:
     - vars/secrets.yml
-
+  
   tasks:
     - name: Installer l'outil de liaison Ansible-Docker
       apt:
         name: python3-docker
         state: present
+    
+    - name: Créer un dossier pour les données sur le serveur
+      file:
+        path: /opt/postgres_data
+        state: directory
+        mode: '0755'
+
+    - name: Définir les noms selon le groupe
+      set_fact:
+        container_name: "{{ 'db_shared_dev_test' if 'dev' in group_names else 'db_prod' }}"
+        db_internal_name: "{{ 'shared_app_db' if 'dev' in group_names else 'prod_app_db' }}"
+        env_tag: "{{ 'development_testing' if 'dev' in group_names else 'production' }}"
 
     - name: Créer et lancer le conteneur de la base de données
       docker_container:
-        name: db_postgres
+        name: "{{ container_name }}"
         image: postgres:15
         state: started
         restart_policy: always
-        # On pioche les secrets dans le coffre-fort avec les {{ }}
         env:
           POSTGRES_USER: "{{ db_user }}"
           POSTGRES_PASSWORD: "{{ db_password }}"
-          POSTGRES_DB: "app_db"
+          POSTGRES_DB: "{{ db_internal_name }}"
         published_ports:
           - "5432:5432"
+        volumes:
+          - /opt/postgres_data:/var/lib/postgresql/data
+        # Ajout de labels (tags) Docker
+        labels:
+          environment: "{{ env_tag }}"
+          managed_by: "ansible"
+          project: "devsecops"

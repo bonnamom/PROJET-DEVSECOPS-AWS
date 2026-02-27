@@ -22,6 +22,14 @@ resource "aws_security_group" "web_sg" {
     cidr_blocks      = ["0.0.0.0/0"]
   }
 
+  # Règle d'entrée : Autoriser le HTTP (Port 5432) pour BDD PostgreSQL
+  ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    self        = true
+  }
+
   # Règle de sortie : Autoriser tout le trafic vers l'extérieur
   # Indispensable pour que le serveur puisse télécharger Docker, Symfony, etc.
   egress {
@@ -34,4 +42,5 @@ resource "aws_security_group" "web_sg" {
   tags = {
     Name = "sg-web-fil-rouge"
   }
+  
 }

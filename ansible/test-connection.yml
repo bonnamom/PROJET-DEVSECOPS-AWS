@@ -1,0 +1,23 @@
+---
+# ÉTAPE 1 : On demande à Ansible de récupérer les infos de dev
+- name: Collecte des infos de Dev
+  hosts: server-dev
+  gather_facts: yes
+
+# ÉTAPE 2 : On fait le test depuis le serveur de test
+- name: Test de connectivité BDD interne
+  hosts: server-test
+  gather_facts: yes
+  tasks:
+    - name: Tentative de connexion sur l'IP PRIVÉE de Dev
+      wait_for:
+        # Maintenant que l'étape 1 est faite, cette variable existe !
+        host: "{{ hostvars['server-dev']['ansible_default_ipv4']['address'] }}"
+        port: 5432
+        state: started
+        timeout: 10
+      register: connect_result
+
+    - name: Afficher le succès
+      debug:
+        msg: "Succès ! Connexion établie via le réseau privé AWS ({{ hostvars['server-dev']['ansible_default_ipv4']['address'] }})."

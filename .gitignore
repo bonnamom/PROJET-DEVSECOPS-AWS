@@ -4,6 +4,9 @@
 *.tfstate.backup
 .terraform.lock.hcl
 
+# Ansible
+ansible/vars/secrets.yml
+
 # Secrets et logs
 *.log
 .env

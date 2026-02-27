@@ -29,6 +29,8 @@ resource "aws_instance" "my_servers" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = "t3.micro" # Gratuit (Free Tier)
 
+  associate_public_ip_address = true
+
   # On les place dans le réseau et le groupe de sécurité qu'on a créés
   subnet_id              = aws_subnet.public_subnet.id
   vpc_security_group_ids = [aws_security_group.web_sg.id]
