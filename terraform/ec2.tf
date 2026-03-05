@@ -23,15 +23,32 @@ data "aws_ami" "ubuntu" {
 
 # 3. Création des instances EC2
 resource "aws_instance" "my_servers" {
-  # On boucle sur notre liste d'environnements
+  # [SKIP CHECHOV] On autorise l'IP publique pour permettre l'accès direct via Ansible 
+  # dans ce cadre de formation (Alternative réelle : Bastion ou VPN).
+  # checkov:skip=CKV_AWS_88: IP publique necessaire pour l'acces Ansible direct
+  # checkov:skip=CKV2_AWS_41: Pas de role IAM necessaire pour ce cas d'usage simple
+  
   count         = length(var.env_names)
   
   ami           = data.aws_ami.ubuntu.id
-  instance_type = "t3.micro" # Gratuit (Free Tier)
+  instance_type = "t3.micro" 
 
   associate_public_ip_address = true
 
-  # On les place dans le réseau et le groupe de sécurité qu'on a créés
+  metadata_options {
+    http_endpoint = "enabled"
+    http_tokens   = "required" # Force IMDSv2
+  }
+
+  monitoring = true
+  ebs_optimized = true
+
+  root_block_device {
+    encrypted = true
+    # [SKIP CHECHOV] Optionnel : evite une alerte si Checkov demande une cle KMS specifique
+    # checkov:skip=CKV_AWS_3: Utilisation du chiffrement par defaut AWS amplement suffisant ici
+  }
+
   subnet_id              = aws_subnet.public_subnet.id
   vpc_security_group_ids = [aws_security_group.web_sg.id]
 

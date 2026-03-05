@@ -18,7 +18,7 @@ L'infrastructure est déployée dans la région **Paris (eu-west-3)** et compren
 - **Cloud :** AWS (EC2, VPC, Security Groups)-
 - **Conteneurisation :** Docker & Docker Compose
 - **Base de données :** PostgreSQL
-- **Sécurité :** Ansible Vault, UFW (Uncomplicated Firewall)
+- **Sécurité :** Ansible Vault, UFW (Uncomplicated Firewall), Chekov, Ansible-lint, GitLeak
 
 
 ## 🚦 Guide de démarrage rapide
@@ -65,7 +65,7 @@ Commande pour installer docker :
 Commande pour lancer le déploiement :
 ````ansible-playbook -i inventory.ini deploy-db.yml --ask-vault-pass````
 
-## Activation du Pare-feu (UFW) :
+## 🧱 Activation du Pare-feu (UFW) :
 Sécurisation de l'OS tout en maintenant l'accès SSH, HTTP et BDD.
 ````ansible -i inventory.ini all -m shell -a "sudo ufw allow 22/tcp && sudo ufw allow 80/tcp && sudo ufw allow 5432/tcp && sudo ufw --force enable"````
 
@@ -73,3 +73,16 @@ Sécurisation de l'OS tout en maintenant l'accès SSH, HTTP et BDD.
 Pour valider que le serveur de Test communique bien avec le serveur de Dev via le réseau privé AWS (port 5432) :
 
 ````ansible-playbook -i inventory.ini test-connection.yml````
+
+## 🛡️ Qualité & Sécurité (Checkov, Ansible-Lint, Gitleaks)
+
+- **Chekov** : Scan de l'Infrastructure-as-Code (Terraform)
+```` docker run --rm -v $(pwd):/tf bridgecrew/checkov -d /tf ````
+
+- **Ansible-Lint** : Validation des bonnes pratiques d'automatisation.
+```` docker run --rm -v $(pwd):/data -w /data cytopia/ansible-lint ansible/ ````
+
+- **Gitleaks** : Détection de secrets (clés AWS, mots de passe) avant le commit.
+```` docker run --rm -v $(pwd):/path zricethezav/gitleaks:latest detect --source="/path" -v ````
+
+Note: Initialement envisagé pour ce projet, l'outil Trivy n'a pas pu être utilisé suite à un incident de sécurité majeur ayant impacté ses dépôts officiels. Par mesure de précaution et pour garantir l'intégrité de notre pipeline DevSecOps, nous avons pivoté vers Checkov et Gitleaks.

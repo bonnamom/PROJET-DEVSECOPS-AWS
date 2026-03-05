@@ -1,32 +1,32 @@
 ---
 - name: Installer et lancer PostgreSQL
   hosts: shared_db, prod_db
-  become: yes
+  become: true
 
   # On lie le coffre-fort au playbook
   vars_files:
     - vars/secrets.yml
-  
+
   tasks:
     - name: Installer l'outil de liaison Ansible-Docker
-      apt:
+      ansible.builtin.apt:
         name: python3-docker
         state: present
-    
+
     - name: Créer un dossier pour les données sur le serveur
-      file:
+      ansible.builtin.file:
         path: /opt/postgres_data
         state: directory
         mode: '0755'
 
     - name: Définir les noms selon le groupe
-      set_fact:
+      ansible.builtin.set_fact:
         container_name: "{{ 'db_shared_dev_test' if 'dev' in group_names else 'db_prod' }}"
         db_internal_name: "{{ 'shared_app_db' if 'dev' in group_names else 'prod_app_db' }}"
         env_tag: "{{ 'development_testing' if 'dev' in group_names else 'production' }}"
 
     - name: Créer et lancer le conteneur de la base de données
-      docker_container:
+      community.docker.docker_container:
         name: "{{ container_name }}"
         image: postgres:15
         state: started

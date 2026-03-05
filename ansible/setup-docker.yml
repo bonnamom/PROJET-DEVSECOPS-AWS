@@ -1,16 +1,16 @@
 ---
 - name: Installation de Docker sur les instances AWS
   hosts: all
-  become: yes  # On utilise sudo pour les installations
-  
+  become: true  # On utilise sudo pour les installations
+
   tasks:
     - name: Mettre à jour le cache des paquets (apt update)
-      apt:
-        update_cache: yes
+      ansible.builtin.apt:
+        update_cache: true
         cache_valid_time: 3600
 
     - name: Installer les dépendances système
-      apt:
+      ansible.builtin.apt:
         name:
           - ca-certificates
           - curl
@@ -18,20 +18,20 @@
         state: present
 
     - name: Installer Docker et Docker-Compose
-      apt:
+      ansible.builtin.apt:
         name:
           - docker.io
           - docker-compose
         state: present
 
-    - name: Démarrer et activer le service Docker
-      service:
+    - name: Demarrer et activer le service Docker
+      ansible.builtin.service:
         name: docker
         state: started
-        enabled: yes
+        enabled: true
 
     - name: Ajouter l'utilisateur ubuntu au groupe docker
-      user:
+      ansible.builtin.user:
         name: ubuntu
         groups: docker
-        append: yes
+        append: true
